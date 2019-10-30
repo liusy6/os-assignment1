@@ -7,22 +7,22 @@
 #include <semaphore.h>
 #include <sys/types.h>
 
-//Ïß³Ì»¥³âÁ¿
+//çº¿ç¨‹äº’æ–¥é‡
 pthread_mutex_t forks[5];
 pthread_cond_t var[5];
 
 int philosophers[5] = {0, 1, 2, 3, 4};
 
-//ÕÜÑ§¼Ò×´Ì¬ 
+//å“²å­¦å®¶çŠ¶æ€ 
 enum {THINKING, HUNGRY,EATING} state[5];
 
-//ÉùÃ÷²Ù×÷º¯Êı,È¡²æº¯Êı,·Å²æº¯Êı,²âÊÔº¯Êı 
+//å£°æ˜æ“ä½œå‡½æ•°,å–å‰å‡½æ•°,æ”¾å‰å‡½æ•°,æµ‹è¯•å‡½æ•° 
 void* philospher(void *arg);
 void pick_forks(int philosopher_number);
 void return_forks(int philosopher_number);
 int test(int); 
 
-//ÑÓ³Ùº¯Êı
+//å»¶è¿Ÿå‡½æ•°
 void delay () {
 	float i=0;
 	while (i<1){
@@ -31,7 +31,7 @@ void delay () {
     sleep(i);
 }
 
-//²âÊÔº¯Êı 
+//æµ‹è¯•å‡½æ•° 
 int test(int i){
 	if(state[i] == HUNGRY && state[(i+4) % 5] != EATING && state[(i+1) % 5] != EATING)
 	{
@@ -44,8 +44,8 @@ void pick_forks(int philosopher_number){
 	state[philosopher_number]=HUNGRY;
 	pthread_mutex_lock(&forks[philosopher_number]);  
 	while (test(philosopher_number) == 0){
-		printf("ÕÜÑ§¼Ò%dÕıÔÚµÈ´ı\n",philosopher_number);
-		pthread_cond_wait(&var[philosopher_number] , &forks[philosopher_number]); //µÈ´ıÌõ¼ş±äÁ¿²ÅÉÏËø£¬±ÜÃâËÀËø 
+		printf("Philosopher%d is waiting.\n",philosopher_number);
+		pthread_cond_wait(&var[philosopher_number] , &forks[philosopher_number]); //ç­‰å¾…æ¡ä»¶å˜é‡æ‰ä¸Šé”ï¼Œé¿å…æ­»é” 
 	}
 	state[philosopher_number]=EATING;
 }
@@ -53,44 +53,44 @@ void pick_forks(int philosopher_number){
 void return_forks(int philosopher_number){
 	state[philosopher_number]=THINKING;
 	pthread_cond_signal(&var[philosopher_number]);
-	//¶Ô½øÊ³ÍêµÄÕÜÑ§¼ÒµÄ×óÓÒÕÜÑ§¼ÒÌõ¼ş±äÁ¿½øĞĞ¸Ä±ä 
+	//å¯¹è¿›é£Ÿå®Œçš„å“²å­¦å®¶çš„å·¦å³å“²å­¦å®¶æ¡ä»¶å˜é‡è¿›è¡Œæ”¹å˜ 
 	pthread_cond_signal(&var[(philosopher_number+4) % 5]);
 	pthread_cond_signal(&var[(philosopher_number+1) % 5]);
 	pthread_mutex_unlock(&forks[philosopher_number]);
 }
 
-//¶¨Òåº¯Êı 
+//å®šä¹‰å‡½æ•° 
 void* philospher(void *arg){
 	int i = *(int *)arg;
 	while(1){
-		printf("ÕÜÑ§¼Ò%dÕıÔÚË¼¿¼ÎÊÌâ\n", i);
+		printf("Philosopher%d is thinking.\n", i);
 		delay();
-		printf("ÕÜÑ§¼Ò%d¶öÁË\n", i);
+		printf("Philosopher%d is hungry.\n", i);
 		pick_forks(i);
-		printf("ÕÜÑ§¼Ò%dÕıÔÚ½øÊ³\n", i);
+		printf("Philosopher%d is eating.\n", i);
 		delay();
-		printf("ÕÜÑ§¼Ò%d³ÔÍêÁË\n",i);
+		printf("Philosopher%d finished eating.\n",i);
 		return_forks(i);
 	}
 }
 
 
 int main (int argc, char **argv) {
-    pthread_t PHD[5];//5¸öÏß³Ì 
+    pthread_t PHD[5];//5ä¸ªçº¿ç¨‹ 
     int i; 
-    //¶¨ÒåÕÜÑ§¼ÒµÄ³õÊ¼×´Ì¬ 
+    //å®šä¹‰å“²å­¦å®¶çš„åˆå§‹çŠ¶æ€ 
     for (i=0; i<5; i++) {
         state[i]=THINKING;
     }
-    //³õÊ¼»¯»¥³âÁ¿ 
+    //åˆå§‹åŒ–äº’æ–¥é‡ 
     for (i=0; i<5; i++) {
         pthread_mutex_init(&forks[i], NULL);
     }
-    //³õÊ¼»¯Ìõ¼ş±äÁ¿ 
+    //åˆå§‹åŒ–æ¡ä»¶å˜é‡ 
     for (i=0; i<5; i++) {
         pthread_cond_init(&var[i],NULL);
     }
-    //´´½¨Ïß³Ì 
+    //åˆ›å»ºçº¿ç¨‹ 
     for (i=0; i<5; i++) {
         pthread_create(&PHD[i], NULL, (void*)philospher, &philosophers[i]);
     }
