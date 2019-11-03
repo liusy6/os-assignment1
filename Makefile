@@ -15,4 +15,4 @@ cons.o:
 mycall:mycall.o
 	
 mycall.o:
-	gcc -o mycall.o mycall.c -lrt -lpthread -lm
+	gcc -o mycall.o mycall.c
